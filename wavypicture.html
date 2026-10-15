@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wavy Picture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0E1D77;
+      --blue: #0072EB;
+      --purple: #3C39EC;
+      --cyan: #1FD4FF;
+      --orange: #F87D47;
+      --bg: #eaf3ff;
+      --wave: #0072EB;
+      --wave-opacity: 0.16;
+      --card: #ffffff;
+      --text: #0E1D77;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #080f3d;
+        --wave: #1FD4FF;
+        --wave-opacity: 0.18;
+        --card: #0E1D77;
+        --text: #eef1ff;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 2rem 1rem;
+      font-family: 'Roboto', sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      /* Wavy line pattern, drawn as a tiled SVG */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cpath d='M0 20 Q 20 0 40 20 T 80 20' fill='none' stroke='%230072EB' stroke-width='2'/%3E%3C/svg%3E");
+      background-size: 80px 40px;
+      animation: drift 18s linear infinite;
+    }
+
+    /* Wave color adapts to light/dark mode via an overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      opacity: calc(1 - var(--wave-opacity) * 3);
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+      from { background-position: 0 0; }
+      to   { background-position: 80px 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+    }
+
+    main {
+      position: relative;
+      width: min(100%, 36rem);
+      background: var(--card);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(14, 29, 119, 0.25);
+    }
+
+    .picture {
+      position: relative;
+      aspect-ratio: 3 / 2;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+    }
+
+    .picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Wavy edge between picture and text */
+    .picture svg {
+      position: absolute;
+      left: 0;
+      bottom: -1px;
+      width: 100%;
+      height: 48px;
+      display: block;
+    }
+
+    .picture svg path { fill: var(--card); }
+
+    .content {
+      padding: 0.5rem 2rem 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Roboto Slab', serif;
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      opacity: 0.8;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 700;
+      padding: 0.7rem 1.4rem;
+      border: 0;
+      border-radius: 8px;
+      background: var(--orange);
+      color: #14183a;
+      cursor: pointer;
+    }
+
+    button:hover { filter: brightness(1.08); }
+    button:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+  <main>
+    <div class="picture">
+      <img id="photo" alt="A random photo" width="900" height="600">
+      <svg viewBox="0 0 600 48" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 24 Q 75 0 150 24 T 300 24 T 450 24 T 600 24 V48 H0 Z"/>
+      </svg>
+    </div>
+
+    <div class="content">
+      <h1>Wavy Picture</h1>
+      <p>A random photo, loaded fresh each time.</p>
+      <button id="new" type="button">Show another picture</button>
+    </div>
+  </main>
+
+  <script>
+    const photo = document.getElementById('photo');
+
+    function loadRandom() {
+      const seed = Math.random().toString(36).slice(2, 10);
+      photo.src = `https://picsum.photos/seed/${seed}/900/600`;
+    }
+
+    document.getElementById('new').addEventListener('click', loadRandom);
+    loadRandom();
+  </script>
+
+</body>
+</html>
