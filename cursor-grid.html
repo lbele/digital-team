@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor grid</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #ffffff; }
+  .cursor-grid {
+    position: fixed;          /* change to absolute to place inside a section */
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;     /* content above stays clickable */
+  }
+</style>
+</head>
+<body>
+
+<canvas class="cursor-grid" id="cursorGrid"></canvas>
+
+<script>
+(() => {
+  // ---- Settings ---------------------------------------------------------
+  const CELL      = 32;        // grid cell size in px
+  const RADIUS    = 180;       // size of the lens around the cursor
+  const STRENGTH  = 0.9;       // how much it zooms (0 – 1.2 looks good)
+  const EASE      = 0.12;      // cursor follow smoothness (lower = floatier)
+  const LINE      = 1;         // line width
+  const COLOR_IN  = '#9AA0AA'; // line color under the cursor
+  const COLOR_OUT = '#E4E6EA'; // line color everywhere else
+  // ----------------------------------------------------------------------
+
+  const canvas = document.getElementById('cursorGrid');
+  const ctx = canvas.getContext('2d');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let w, h, dpr;
+  const target = { x: -9999, y: -9999 };
+  const pos    = { x: -9999, y: -9999 };
+  let power = 0, targetPower = 0;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // Pushes points outward from the cursor -> magnified look, no folding
+  function warp(x, y) {
+    const dx = x - pos.x, dy = y - pos.y;
+    const r = Math.hypot(dx, dy);
+    if (r >= RADIUS || r === 0) return [x, y];
+    const t = 1 - r / RADIUS;
+    const f = 1 + STRENGTH * power * t * t;
+    return [pos.x + dx * f, pos.y + dy * f];
+  }
+
+  function draw() {
+    pos.x += (target.x - pos.x) * EASE;
+    pos.y += (target.y - pos.y) * EASE;
+    power += (targetPower - power) * 0.08;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, RADIUS * 1.2);
+    g.addColorStop(0, COLOR_IN);
+    g.addColorStop(1, COLOR_OUT);
+    ctx.strokeStyle = power > 0.01 ? g : COLOR_OUT;
+    ctx.lineWidth = LINE;
+    ctx.beginPath();
+
+    const step = 8; // sampling along each line; smaller = smoother curves
+    const ox = (w % CELL) / 2, oy = (h % CELL) / 2;
+
+    for (let x = ox; x <= w; x += CELL) {
+      const near = Math.abs(x - pos.x) < RADIUS && power > 0.01;
+      if (!near) { ctx.moveTo(x, 0); ctx.lineTo(x, h); continue; }
+      for (let y = 0; y <= h + step; y += step) {
+        const [px, py] = warp(x, y);
+        y === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+    }
+    for (let y = oy; y <= h; y += CELL) {
+      const near = Math.abs(y - pos.y) < RADIUS && power > 0.01;
+      if (!near) { ctx.moveTo(0, y); ctx.lineTo(w, y); continue; }
+      for (let x = 0; x <= w + step; x += step) {
+        const [px, py] = warp(x, y);
+        x === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+    }
+    ctx.stroke();
+
+    if (!reduceMotion) requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('pointermove', e => {
+    const rect = canvas.getBoundingClientRect();
+    target.x = e.clientX - rect.left;
+    target.y = e.clientY - rect.top;
+    if (pos.x < -999) { pos.x = target.x; pos.y = target.y; }
+    targetPower = 1;
+  });
+  document.addEventListener('pointerleave', () => { targetPower = 0; });
+  window.addEventListener('blur', () => { targetPower = 0; });
+  window.addEventListener('resize', () => { resize(); if (reduceMotion) draw(); });
+
+  resize();
+  draw();
+})();
+</script>
+</body>
+</html>
