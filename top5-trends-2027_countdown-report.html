@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="MSRAI_Label_dbd012e0-e600-4c3e-83b7-7d3141c15efc_AI_Disclosure" content="Made with AI">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Report countdown: 28 January 2027</title>
+<style>
+  /* ---------- Demo page only ---------- */
+  :root{--demo-bg:#1D1F78;}
+  @media (prefers-color-scheme: light){:root{--demo-bg:#1D1F78;}}
+  html,body{margin:0;}
+  body{background:var(--demo-bg);min-block-size:100vh;display:grid;place-items:center;font-family:Roboto,"Segoe UI",Arial,sans-serif;}
+
+  /* ===== Countdown: CSS, copy from here ===== */
+  .lw-countdown{
+    --tile:rgba(255,255,255,.12); --tile-edge:rgba(255,255,255,.16); --fold:rgba(12,21,87,.55);
+    --num:#fff; --label:#45C2F0;
+    display:flex; gap:clamp(8px,1.6vw,12px); justify-content:center; background:transparent;
+    font-family:Roboto,"Segoe UI",Arial,sans-serif; padding:8px;
+  }
+  .lw-countdown .unit{
+    position:relative; inline-size:clamp(66px,16vw,74px); padding-block:10px 9px; box-sizing:border-box;
+    background:var(--tile); border:1px solid var(--tile-edge); border-radius:6px; text-align:center;
+    opacity:0; transform:translateY(10px); animation:lwIn .6s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:calc(var(--i) * 90ms);
+  }
+  .lw-countdown .unit::before{ /* flip-card fold line */
+    content:""; position:absolute; inset-inline:0; inset-block-start:47%; block-size:1px; background:var(--fold); z-index:2;
+  }
+  .lw-countdown .val{position:relative; display:block; block-size:1.1em; overflow:hidden;
+    color:var(--num); font-weight:700; font-size:clamp(28px,6vw,32px); line-height:1.1; font-variant-numeric:tabular-nums;}
+  .lw-countdown .val span{position:absolute; inset-inline:0; inset-block-start:0;}
+  .lw-countdown .val .new{animation:lwDrop .45s cubic-bezier(.22,1,.36,1) both;}
+  .lw-countdown .val .old{animation:lwOut .45s cubic-bezier(.22,1,.36,1) both;}
+  .lw-countdown .lbl{display:block; margin-block-start:6px; color:var(--label); font-size:10px; letter-spacing:.06em; text-transform:uppercase;}
+  .lw-countdown.done .unit{opacity:.55;}
+  @keyframes lwIn{to{opacity:1; transform:none;}}
+  @keyframes lwDrop{from{transform:translateY(-100%); opacity:0;} to{transform:none; opacity:1;}}
+  @keyframes lwOut{from{transform:none; opacity:1;} to{transform:translateY(100%); opacity:0;}}
+  @media (prefers-reduced-motion: reduce){
+    .lw-countdown .unit{animation:none; opacity:1; transform:none;}
+    .lw-countdown .val .new,.lw-countdown .val .old{animation:none;}
+    .lw-countdown .val .old{display:none;}
+  }
+  /* ===== to here ===== */
+</style>
+</head>
+<body>
+  <!-- ===== Countdown: HTML, copy from here. Target time is in data-target (10am ET = 15:00 UTC) ===== -->
+  <div class="lw-countdown" data-target="2027-01-28T10:00:00-05:00" role="timer" aria-label="Time until the report on 28 January 2027 at 10am ET">
+    <div class="unit" style="--i:0"><span class="val" data-k="d"><span>00</span></span><span class="lbl">Days</span></div>
+    <div class="unit" style="--i:1"><span class="val" data-k="h"><span>00</span></span><span class="lbl">Hours</span></div>
+    <div class="unit" style="--i:2"><span class="val" data-k="m"><span>00</span></span><span class="lbl">Minutes</span></div>
+    <div class="unit" style="--i:3"><span class="val" data-k="s"><span>00</span></span><span class="lbl">Seconds</span></div>
+  </div>
+  <!-- ===== to here ===== -->
+
+<script>
+/* ===== Countdown: script, copy from here ===== */
+(function(){
+  document.querySelectorAll('.lw-countdown').forEach(function(el){
+    var target=new Date(el.dataset.target).getTime(), last={};
+    var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function set(k,v){
+      if(last[k]===v) return;
+      var box=el.querySelector('[data-k="'+k+'"]');
+      if(last[k]===undefined||reduce){ box.innerHTML='<span>'+v+'</span>'; }
+      else { box.innerHTML='<span class="old">'+last[k]+'</span><span class="new">'+v+'</span>'; }
+      last[k]=v;
+    }
+    function pad(n){ return (n<10?'0':'')+n; }
+    function tick(){
+      var t=Math.max(0,Math.floor((target-Date.now())/1000));
+      set('d',pad(Math.floor(t/86400))); set('h',pad(Math.floor(t%86400/3600)));
+      set('m',pad(Math.floor(t%3600/60))); set('s',pad(t%60));
+      if(t===0){ el.classList.add('done'); clearInterval(timer); }
+    }
+    var timer=setInterval(tick,1000); tick();
+  });
+})();
+/* ===== to here ===== */
+</script>
+</body>
+</html>
